@@ -9,7 +9,6 @@ app = FastAPI()
 # =========================
 # CORS
 # =========================
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,7 +20,6 @@ app.add_middleware(
 # =========================
 # DATABASE
 # =========================
-
 DB_NAME = "saac_cosio.db"
 
 COMMUNITIES = [
@@ -36,11 +34,9 @@ COMMUNITIES = [
 ]
 
 def init_db():
-
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    # TABLA USUARIOS
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,7 +45,6 @@ def init_db():
     )
     """)
 
-    # TABLA REPORTES
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS reports (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,9 +65,8 @@ def init_db():
 init_db()
 
 # =========================
-# PRIORIDAD AUTOMÁTICA
+# PRIORIDAD
 # =========================
-
 PRIORITY_MAP = {
     "Punta": "Alta",
     "El Refugio de Providencia": "Media",
@@ -88,17 +82,14 @@ def get_priority(zone):
     return PRIORITY_MAP.get(zone, "Media")
 
 # =========================
-# REGISTRO DE USUARIOS
+# REGISTER
 # =========================
-
 @app.post("/register")
 async def register_user(
     name: str = Form(...),
     email: str = Form(...)
 ):
-
     try:
-
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
 
@@ -108,9 +99,7 @@ async def register_user(
         )
 
         conn.commit()
-
         user_id = cursor.lastrowid
-
         conn.close()
 
         return {
@@ -129,7 +118,6 @@ async def register_user(
         )
 
         user = cursor.fetchone()
-
         conn.close()
 
         return {
@@ -138,36 +126,26 @@ async def register_user(
         }
 
 # =========================
-# CREAR REPORTE
+# REPORT
 # =========================
-
 @app.post("/report")
 async def create_report(
-
     user_id: int = Form(...),
     description: str = Form(...),
     zone: str = Form(...),
     lat: float = Form(...),
     lng: float = Form(...),
     image: UploadFile = File(None)
-
 ):
 
     if zone not in COMMUNITIES:
-        raise HTTPException(
-            status_code=400,
-            detail="Zona inválida"
-        )
+        raise HTTPException(status_code=400, detail="Zona inválida")
 
     priority = get_priority(zone)
-
     image_path = None
 
-    # GUARDAR IMAGEN
     if image:
-
         os.makedirs("uploads", exist_ok=True)
-
         image_path = f"uploads/{image.filename}"
 
         with open(image_path, "wb") as buffer:
@@ -177,20 +155,10 @@ async def create_report(
     cursor = conn.cursor()
 
     cursor.execute("""
-    INSERT INTO reports
-    (
-        user_id,
-        description,
-        zone,
-        lat,
-        lng,
-        status,
-        priority,
-        image_path
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """,
-    (
+    INSERT INTO reports (
+        user_id, description, zone, lat, lng, status, priority, image_path
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
         user_id,
         description,
         zone,
@@ -202,7 +170,6 @@ async def create_report(
     ))
 
     report_id = cursor.lastrowid
-
     conn.commit()
     conn.close()
 
@@ -215,30 +182,22 @@ async def create_report(
 # =========================
 # OBTENER REPORTES
 # =========================
-
 @app.get("/admin/reports")
 async def get_reports():
-
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM reports")
-
     rows = cursor.fetchall()
 
     conn.close()
-
     return rows
 
 # =========================
 # ACTUALIZAR ESTADO
 # =========================
-
 @app.put("/admin/reports/{report_id}")
-async def update_status(
-    report_id: int,
-    status: str = "Atendido"
-):
+async def update_status(report_id: int, status: str = "Atendido"):
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -251,14 +210,11 @@ async def update_status(
     conn.commit()
     conn.close()
 
-    return {
-        "status": "Actualizado"
-    }
-    
-    # =========================
+    return {"status": "Actualizado"}
+
+# =========================
 # ELIMINAR REPORTE
 # =========================
-
 @app.delete("/admin/reports/{report_id}")
 async def delete_report(report_id: int):
 
@@ -271,51 +227,28 @@ async def delete_report(report_id: int):
     )
 
     conn.commit()
-
     conn.close()
 
-    return {
-        "status": "Reporte eliminado"
-    }
+    return {"status": "Reporte eliminado"}
 
 # =========================
-# INICIO DEL SERVIDOR
+# HOME
 # =========================
-
-@app.put("/admin/reports/{report_id}")
-async def delete_report(report_id: int):
-
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "DELETE FROM reports WHERE id = ?",
-        (report_id,)
-    )
-
-    conn.commit()
-    conn.close()
-
-    return {
-        "status": "Reporte eliminado"
-    }
-    
-
-# =========================
-# RUTA PRINCIPAL
-# =========================
-
 @app.get("/")
 async def home():
-
     return {
         "mensaje": "SAAC Cosío funcionando correctamente"
     }
 
+# =========================
+# RUN (RENDER COMPATIBLE)
+# =========================
 if __name__ == "__main__":
+
+    port = int(os.environ.get("PORT", 8000))
 
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=8001
+        port=port
     )
