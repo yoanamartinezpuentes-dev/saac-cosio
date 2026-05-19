@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Panel Administrativo SAAC</title>
+
+<link rel="stylesheet" href="styles.css">
+
+<style>
+
+.admin-title{
+
+    text-align:center;
+    color:#c77dff;
+    margin-bottom:20px;
+
+}
+
+.report-card{
+
+    background:#1e1e1e;
+    border:1px solid #7b2cbf;
+    border-radius:20px;
+    padding:20px;
+    margin-top:20px;
+    box-shadow:0 5px 15px rgba(123,44,191,0.3);
+
+}
+
+.report-card h2{
+
+    color:#c77dff;
+    margin-bottom:10px;
+
+}
+
+.report-card p{
+
+    margin-top:8px;
+    color:#f1f1f1;
+
+}
+
+.priority{
+
+    color:#ffd60a;
+    font-weight:bold;
+
+}
+
+.status{
+
+    color:#80ed99;
+    font-weight:bold;
+
+}
+
+.report-image{
+
+    width:100%;
+    margin-top:15px;
+    border-radius:15px;
+    border:2px solid #7b2cbf;
+
+}
+
+button{
+
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:10px;
+
+    background:linear-gradient(
+        135deg,
+        #7b2cbf,
+        #9d4edd
+    );
+
+    color:white;
+    font-size:15px;
+    font-weight:bold;
+    cursor:pointer;
+
+}
+
+button:hover{
+
+    opacity:0.9;
+
+}
+
+.top-buttons{
+
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+
+}
+
+.top-buttons a{
+
+    width:100%;
+    text-decoration:none;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1 class="admin-title">
+
+        Panel Administrativo SAAC
+
+    </h1>
+
+    <div class="top-buttons">
+
+        <a href="index.html">
+
+            <button>
+
+                Ir a Reportes Ciudadanos
+
+            </button>
+
+        </a>
+
+    </div>
+
+    <div id="reportsContainer"></div>
+
+</div>
+
+<script>
+
+async function loadReports(){
+
+    try{
+
+        const response = await fetch(
+
+            "http://127.0.0.1:8001/admin/reports"
+
+        );
+
+        const reports = await response.json();
+
+        const container = document.getElementById(
+            "reportsContainer"
+        );
+
+        container.innerHTML = "";
+
+        if(reports.length === 0){
+
+            container.innerHTML = `
+
+                <div class="report-card">
+
+                    <h2>
+                        No hay reportes todavía
+                    </h2>
+
+                </div>
+
+            `;
+
+            return;
+        }
+
+        reports.reverse();
+
+        reports.forEach(report => {
+
+            const card = document.createElement("div");
+
+            card.className = "report-card";
+
+            card.innerHTML = `
+
+                <h2>
+                    Reporte #${report[0]}
+                </h2>
+
+                <p>
+                    <strong>Descripción:</strong>
+                    ${report[2]}
+                </p>
+
+                <p>
+                    <strong>Comunidad:</strong>
+                    ${report[3]}
+                </p>
+
+                <p class="priority">
+                    Prioridad:
+                    ${report[6]}
+                </p>
+
+                <p class="status">
+                    Estado:
+                    ${report[5]}
+                </p>
+
+                <p>
+                    <strong>Latitud:</strong>
+                    ${report[4]}
+                </p>
+
+                <p>
+                    <strong>Longitud:</strong>
+                    ${report[5]}
+                </p>
+
+                <button
+                    onclick="markAttended(${report[0]})"
+                >
+
+                    Marcar como Atendido
+
+                </button>
+
+                ${report[7]
+                    ? `
+                    <img
+                    class="report-image"
+                    src="http://127.0.0.1:8001/${report[7]}"
+                    >
+                    `
+                    : ""
+                }
+
+            `;
+
+            container.appendChild(card);
+
+        });
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+        alert(
+            "Error al cargar reportes"
+        );
+
+    }
+
+}
+
+async function markAttended(id){
+
+    try{
+
+        await fetch(
+
+            `http://127.0.0.1:8001/admin/reports/${id}`,
+
+            {
+                method:"DELETE"
+            }
+
+        );
+
+        alert(
+            "Reporte eliminado"
+        );
+
+        loadReports();
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+
+loadReports();
+
+</script>
+
+</body>
+
+</html>
