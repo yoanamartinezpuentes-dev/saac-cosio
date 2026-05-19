@@ -4,54 +4,38 @@
 
 const map = L.map('map').setView([22.366, -102.3], 12);
 
-// MAPA OPENSTREETMAP
-L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    {
-        attribution: 'OpenStreetMap'
-    }
-).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: 'OpenStreetMap'
+}).addTo(map);
 
-// VARIABLES GPS
+// GPS
 let currentLat = null;
 let currentLng = null;
 
-// OBTENER UBICACIÓN
 navigator.geolocation.getCurrentPosition(
-
     (position) => {
-
         currentLat = position.coords.latitude;
         currentLng = position.coords.longitude;
 
-        // MARCADOR USUARIO
         L.marker([currentLat, currentLng])
             .addTo(map)
             .bindPopup("Tu ubicación actual")
             .openPopup();
 
-        // CENTRAR MAPA
         map.setView([currentLat, currentLng], 14);
-
     },
-
     () => {
-
-        alert(
-            "Debes permitir acceso a la ubicación GPS"
-        );
-
+        alert("Debes permitir acceso a la ubicación GPS");
     }
-
 );
 
 // =========================
-// ENVIAR REPORTE
+// ENVIAR REPORTE (CORREGIDO)
 // =========================
 
-async function submitReport(){
+async function submitReport() {
 
-    try{
+    try {
 
         const name = document.getElementById("name").value;
         const email = document.getElementById("email").value;
@@ -59,122 +43,87 @@ async function submitReport(){
         const desc = document.getElementById("desc").value;
         const image = document.getElementById("img").files[0];
 
-        if(!name || !email || !desc){
+        if (!name || !email || !desc) {
             alert("Completa todos los campos");
             return;
         }
 
-        // VALIDAR GPS
-        if(currentLat === null || currentLng === null){
+        if (currentLat === null || currentLng === null) {
             alert("Activa la ubicación GPS y recarga la página");
             return;
         }
 
         // =========================
-        // REGISTRAR USUARIO
+        // REGISTER
         // =========================
-
         const registerData = new FormData();
-
         registerData.append("name", name);
         registerData.append("email", email);
 
         const registerResponse = await fetch(
-
             "https://saac-cosio.onrender.com/register",
-
             {
                 method: "POST",
                 body: registerData
             }
-
         );
 
-        const registerJson =
-            await registerResponse.json();
+        if (!registerResponse.ok) {
+            throw new Error("Error en /register: " + registerResponse.status);
+        }
+
+        const registerJson = await registerResponse.json();
+        console.log("REGISTER RESPONSE:", registerJson);
+
+        // 🔥 aceptar user_id o id
+        const userId = registerJson.user_id || registerJson.id;
+
+        if (!userId) {
+            throw new Error("El backend no devolvió user_id o id");
+        }
 
         // =========================
-        // CREAR REPORTE
+        // REPORT
         // =========================
-
         const reportData = new FormData();
 
-        reportData.append(
-            "user_id",
-            registerJson.user_id
-        );
+        reportData.append("user_id", userId);
+        reportData.append("description", desc);
+        reportData.append("zone", zone);
+        reportData.append("lat", currentLat);
+        reportData.append("lng", currentLng);
 
-        reportData.append(
-            "description",
-            desc
-        );
-
-        reportData.append(
-            "zone",
-            zone
-        );
-
-        reportData.append(
-            "lat",
-            currentLat
-        );
-
-        reportData.append(
-            "lng",
-            currentLng
-        );
-
-        // IMAGEN
-        if(image){
-
-            reportData.append(
-                "image",
-                image
-            );
-
+        if (image) {
+            reportData.append("image", image);
         }
 
         const reportResponse = await fetch(
-
-           "https://saac-cosio.onrender.com/report",
-
+            "https://saac-cosio.onrender.com/report",
             {
                 method: "POST",
                 body: reportData
             }
-
         );
 
-        const reportJson =
-            await reportResponse.json();
+        if (!reportResponse.ok) {
+            throw new Error("Error en /report: " + reportResponse.status);
+        }
 
-        // MENSAJE
+        const reportJson = await reportResponse.json();
+
         alert(
-
-            "Reporte enviado correctamente\n\n" +
-
-            "Prioridad asignada: " +
-
+            "Reporte enviado correctamente\n\nPrioridad: " +
             reportJson.priority
-
         );
 
-        // LIMPIAR FORMULARIO
+        // LIMPIAR
         document.getElementById("name").value = "";
         document.getElementById("email").value = "";
         document.getElementById("desc").value = "";
         document.getElementById("img").value = "";
 
+    } catch (error) {
+        console.log("ERROR COMPLETO:", error);
+        alert("Error al enviar reporte: " + error.message);
     }
-
-    catch(error){
-
-        console.log(error);
-
-        alert(
-            "Error al enviar reporte"
-        );
-
-    }
-
 }
