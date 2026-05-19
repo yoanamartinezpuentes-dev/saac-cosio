@@ -34,7 +34,7 @@ navigator.geolocation.getCurrentPosition(
 // =========================
 
 async function submitReport() {
-
+       console.log("BOTÓN FUNCIONA");
     try {
 
         const name = document.getElementById("name").value;
