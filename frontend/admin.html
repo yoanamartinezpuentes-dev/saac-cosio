@@ -266,12 +266,8 @@ async function markAttended(id){
 
     try{
 
-        await fetch(
-
-            `https://saac-cosio.onrender.com/admin/reports/${id}`,
-
-            {
-                method:"DELETE"
+        await fetch(`https://saac-cosio.onrender.com/admin/reports/${id}`, {
+  method: "DELETE"
             }
 
         );
