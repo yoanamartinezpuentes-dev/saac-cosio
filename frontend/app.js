@@ -30,7 +30,7 @@ navigator.geolocation.getCurrentPosition(
 );
 
 // =========================
-// ENVIAR REPORTE (CORREGIDO)
+// ENVIAR REPORTE
 // =========================
 
 async function submitReport() {
@@ -56,15 +56,16 @@ async function submitReport() {
         // =========================
         // REGISTER
         // =========================
-        const registerData = new FormData();
-        registerData.append("name", name);
-        registerData.append("email", email);
-
         const registerResponse = await fetch(
             "https://saac-cosio.onrender.com/register",
             {
                 method: "POST",
-                body: registerData
+                body: (() => {
+                    const fd = new FormData();
+                    fd.append("name", name);
+                    fd.append("email", email);
+                    return fd;
+                })()
             }
         );
 
@@ -72,36 +73,43 @@ async function submitReport() {
             throw new Error("Error en /register: " + registerResponse.status);
         }
 
-        const registerJson = await registerResponse.json();
+        let registerJson;
+        try {
+            registerJson = await registerResponse.json();
+        } catch (e) {
+            throw new Error("Respuesta inválida en /register (no es JSON)");
+        }
+
         console.log("REGISTER RESPONSE:", registerJson);
 
-        // 🔥 aceptar user_id o id
-        const userId = registerJson.user_id || registerJson.id;
+        const userId = registerJson.user_id ?? registerJson.id;
 
         if (!userId) {
-            throw new Error("El backend no devolvió user_id o id");
+            throw new Error("El backend no devolvió user_id ni id");
         }
 
         // =========================
         // REPORT
         // =========================
-        const reportData = new FormData();
-
-        reportData.append("user_id", userId);
-        reportData.append("description", desc);
-        reportData.append("zone", zone);
-        reportData.append("lat", currentLat);
-        reportData.append("lng", currentLng);
-
-        if (image) {
-            reportData.append("image", image);
-        }
-
         const reportResponse = await fetch(
             "https://saac-cosio.onrender.com/report",
             {
                 method: "POST",
-                body: reportData
+                body: (() => {
+                    const fd = new FormData();
+
+                    fd.append("user_id", userId);
+                    fd.append("description", desc);
+                    fd.append("zone", zone);
+                    fd.append("lat", currentLat);
+                    fd.append("lng", currentLng);
+
+                    if (image) {
+                        fd.append("image", image);
+                    }
+
+                    return fd;
+                })()
             }
         );
 
@@ -109,7 +117,12 @@ async function submitReport() {
             throw new Error("Error en /report: " + reportResponse.status);
         }
 
-        const reportJson = await reportResponse.json();
+        let reportJson;
+        try {
+            reportJson = await reportResponse.json();
+        } catch (e) {
+            throw new Error("Respuesta inválida en /report (no es JSON)");
+        }
 
         alert(
             "Reporte enviado correctamente\n\nPrioridad: " +
