@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SAAC Cosío</title>
+
+<link rel="stylesheet" href="styles.css">
+
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css"
+/>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>SAAC Cosío</h1>
+
+        <p class="subtitle">
+            Sistema de Atención y Reporte Ciudadano
+        </p>
+
+        <!-- NOMBRE -->
+        <input
+            type="text"
+            id="name"
+            placeholder="Nombre completo"
+        >
+
+        <!-- CORREO -->
+        <input
+            type="email"
+            id="email"
+            placeholder="Correo electrónico"
+        >
+
+        <!-- COMUNIDADES -->
+        <select id="zone">
+
+            <option>Punta</option>
+
+            <option>
+                El Refugio de Providencia
+            </option>
+
+            <option>
+                El Salero
+            </option>
+
+            <option>
+                Santa María de la Paz
+            </option>
+
+            <option>
+                Soledad de Abajo
+            </option>
+
+            <option>
+                Guadalupito
+            </option>
+
+            <option>
+                Zacatequillas
+            </option>
+
+            <option>
+                El Durazno
+            </option>
+
+        </select>
+
+        <!-- DESCRIPCIÓN -->
+        <textarea
+            id="desc"
+            placeholder="Describe el problema ciudadano"
+        ></textarea>
+
+        <!-- IMAGEN -->
+        <label class="upload-label">
+
+            Subir imagen
+
+            <input
+                type="file"
+                id="img"
+                accept="image/*"
+            >
+
+        </label>
+
+        <!-- BOTÓN -->
+        <button onclick="submitReport()">
+
+            Enviar Reporte
+
+        </button>
+
+    </div>
+
+    <!-- MAPA -->
+    <div id="map"></div>
+
+</div>
+
+<!-- LEAFLET -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- APP JS -->
+<script src="app.js"></script>
+
+</body>
+
+</html>
