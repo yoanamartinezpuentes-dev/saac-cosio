@@ -53,29 +53,20 @@ async function submitReport(){
 
     try{
 
-        // DATOS USUARIO
-        const name =
-            document.getElementById("name").value;
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const zone = document.getElementById("zone").value;
+        const desc = document.getElementById("desc").value;
+        const image = document.getElementById("img").files[0];
 
-        const email =
-            document.getElementById("email").value;
-
-        const zone =
-            document.getElementById("zone").value;
-
-        const desc =
-            document.getElementById("desc").value;
-
-        const image =
-            document.getElementById("img").files[0];
-
-        // VALIDACIONES
         if(!name || !email || !desc){
+            alert("Completa todos los campos");
+            return;
+        }
 
-            alert(
-                "Completa todos los campos"
-            );
-
+        // VALIDAR GPS
+        if(currentLat === null || currentLng === null){
+            alert("Activa la ubicación GPS y recarga la página");
             return;
         }
 
