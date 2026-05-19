@@ -151,7 +151,7 @@ async function loadReports(){
 
         const response = await fetch(
 
-            "http://127.0.0.1:8001/admin/reports"
+            "https://saac-cosio.onrender.com/admin/reports"
 
         );
 
@@ -236,7 +236,7 @@ async function loadReports(){
                     ? `
                     <img
                     class="report-image"
-                    src="http://127.0.0.1:8001/${report[7]}"
+                    src="https://saac-cosio.onrender.com/${report[7]}"
                     >
                     `
                     : ""
@@ -268,7 +268,7 @@ async function markAttended(id){
 
         await fetch(
 
-            `http://127.0.0.1:8001/admin/reports/${id}`,
+            `https://saac-cosio.onrender.com/admin/reports/${id}`,
 
             {
                 method:"DELETE"

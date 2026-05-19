@@ -90,7 +90,7 @@ async function submitReport(){
 
         const registerResponse = await fetch(
 
-            "http://127.0.0.1:8000/register",
+            "https://saac-cosio.onrender.com/register",
 
             {
                 method: "POST",
@@ -145,7 +145,7 @@ async function submitReport(){
 
         const reportResponse = await fetch(
 
-            "http://127.0.0.1:8001/report",
+           "https://saac-cosio.onrender.com/report",
 
             {
                 method: "POST",
